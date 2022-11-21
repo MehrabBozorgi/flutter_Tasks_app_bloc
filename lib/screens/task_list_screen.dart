@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc_todo/model/task.dart';
 
-import 'bloc/bloc_exports.dart';
+import '../bloc/bloc_exports.dart';
+import 'my_drawer.dart';
 
 class TaskListScreen extends StatelessWidget {
   TaskListScreen({Key? key}) : super(key: key);
-
+  static const id = 'task_screen';
   TextEditingController titleController = TextEditingController();
 
   void _addTask(BuildContext context) {
@@ -43,7 +44,7 @@ class TaskListScreen extends StatelessWidget {
                   ),
                   ElevatedButton(
                     onPressed: () {
-                      var task=Task(title: titleController.text);
+                      var task = Task(title: titleController.text);
                       context.read<TaskBloc>().add(AddTask(task: task));
                       titleController.clear();
                       Navigator.of(context).pop();
@@ -62,6 +63,7 @@ class TaskListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: const MyDrawer(),
       appBar: AppBar(
         title: const Text('Task List'),
       ),
@@ -75,10 +77,17 @@ class TaskListScreen extends StatelessWidget {
             itemBuilder: (context, index) {
               var helper = state.allTasks[index];
               return ListTile(
-                onLongPress: (){
-                  context.read<TaskBloc>().add(DeleteTask(task: helper));
+                onLongPress: () {
+                  context.read<TaskBloc>().add(RemoveTask(task: helper));
                 },
-                title: Text(helper.title),
+                title: Text(
+                  helper.title,
+                  style: helper.isDone!
+                      ? const TextStyle(
+                          decoration: TextDecoration.lineThrough,
+                        )
+                      : const TextStyle(color: Colors.black),
+                ),
                 trailing: Checkbox(
                   value: helper.isDone,
                   onChanged: (value) {
