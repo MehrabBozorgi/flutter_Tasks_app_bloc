@@ -43,9 +43,9 @@ class TaskListScreen extends StatelessWidget {
                   ),
                   ElevatedButton(
                     onPressed: () {
-                      var task = Task(title: titleController.text);
-
-                      context.read<TasksBloc>().add(AddTask(task: task));
+                      var task=Task(title: titleController.text);
+                      context.read<TaskBloc>().add(AddTask(task: task));
+                      titleController.clear();
                       Navigator.of(context).pop();
                     },
                     child: const Text('add task'),
@@ -61,39 +61,35 @@ class TaskListScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<TasksBloc, TasksState>(
-      builder: (context, state) {
-        List<Task> taskList = state.allTasks;
-        return Scaffold(
-          resizeToAvoidBottomInset: true,
-          floatingActionButton: FloatingActionButton(
-            onPressed: () => _addTask(context),
-            child: const Icon(Icons.add),
-          ),
-          appBar: AppBar(
-            title: const Text('Add Task'),
-          ),
-          body: ListView.builder(
-            itemCount: taskList.length,
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Task List'),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _addTask(context),
+      ),
+      body: BlocBuilder<TaskBloc, TaskState>(
+        builder: (context, state) {
+          return ListView.builder(
+            itemCount: state.allTasks.length,
             itemBuilder: (context, index) {
+              var helper = state.allTasks[index];
               return ListTile(
-                onLongPress: () => context
-                    .read<TasksBloc>()
-                    .add(DeleteTask(task: taskList[index])),
-                title: Text(taskList[index].title),
+                onLongPress: (){
+                  context.read<TaskBloc>().add(DeleteTask(task: helper));
+                },
+                title: Text(helper.title),
                 trailing: Checkbox(
-                  value: taskList[index].isDone,
+                  value: helper.isDone,
                   onChanged: (value) {
-                    context
-                        .read<TasksBloc>()
-                        .add(UpdateTask(task: taskList[index]));
+                    context.read<TaskBloc>().add(UpdateTask(task: helper));
                   },
                 ),
               );
             },
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }
